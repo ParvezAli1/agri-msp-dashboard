@@ -1,0 +1,45 @@
+{
+  "Mirchi": [
+    { "market": "Warangal", "arrival_date": "06-02-2026", "modal_price": 12000 },
+    { "market": "Warangal", "arrival_date": "07-02-2026", "modal_price": 15000 },
+    { "market": "Warangal", "arrival_date": "08-02-2026", "modal_price": 11000 },
+    { "market": "Warangal", "arrival_date": "09-02-2026", "modal_price": 17000 },
+    { "market": "Warangal", "arrival_date": "10-02-2026", "modal_price": 13000 },
+
+    { "market": "Khammam", "arrival_date": "06-02-2026", "modal_price": 10000 },
+    { "market": "Khammam", "arrival_date": "07-02-2026", "modal_price": 10500 },
+    { "market": "Khammam", "arrival_date": "08-02-2026", "modal_price": 9500 },
+    { "market": "Khammam", "arrival_date": "09-02-2026", "modal_price": 11500 },
+    { "market": "Khammam", "arrival_date": "10-02-2026", "modal_price": 10800 }
+  ],
+
+  "Tomato": [
+    { "market": "Medak", "arrival_date": "06-02-2026", "modal_price": 800 },
+    { "market": "Medak", "arrival_date": "07-02-2026", "modal_price": 1200 },
+    { "market": "Medak", "arrival_date": "08-02-2026", "modal_price": 600 },
+    { "market": "Medak", "arrival_date": "09-02-2026", "modal_price": 1500 },
+    { "market": "Medak", "arrival_date": "10-02-2026", "modal_price": 900 },
+
+    { "market": "Karimnagar", "arrival_date": "06-02-2026", "modal_price": 1000 },
+    { "market": "Karimnagar", "arrival_date": "07-02-2026", "modal_price": 1100 },
+    { "market": "Karimnagar", "arrival_date": "08-02-2026", "modal_price": 950 },
+    { "market": "Karimnagar", "arrival_date": "09-02-2026", "modal_price": 1300 },
+    { "market": "Karimnagar", "arrival_date": "10-02-2026", "modal_price": 1050 }
+  ],
+
+  "Wheat": [
+    { "market": "Nizamabad", "arrival_date": "06-02-2026", "modal_price": 2100 },
+    { "market": "Nizamabad", "arrival_date": "07-02-2026", "modal_price": 2200 },
+    { "market": "Nizamabad", "arrival_date": "08-02-2026", "modal_price": 2300 },
+    { "market": "Nizamabad", "arrival_date": "09-02-2026", "modal_price": 2400 },
+    { "market": "Nizamabad", "arrival_date": "10-02-2026", "modal_price": 2500 }
+  ],
+
+  "Rice": [
+    { "market": "Siddipet", "arrival_date": "06-02-2026", "modal_price": 3400 },
+    { "market": "Siddipet", "arrival_date": "07-02-2026", "modal_price": 3300 },
+    { "market": "Siddipet", "arrival_date": "08-02-2026", "modal_price": 3200 },
+    { "market": "Siddipet", "arrival_date": "09-02-2026", "modal_price": 3100 },
+    { "market": "Siddipet", "arrival_date": "10-02-2026", "modal_price": 3000 }
+  ]
+}
