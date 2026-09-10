@@ -2,9 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Telangana Smart Market Intelligence</title>
+<title>Telangana Smart Mandi Dashboard - Login</title>
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body class="bg-gray-100 font-sans min-h-screen">
@@ -13,7 +12,6 @@
 <nav class="bg-green-800 text-white p-4 shadow">
 <div class="container mx-auto flex items-center justify-between">
 <h1 class="text-xl font-bold">🌾 Telangana Smart Mandi Dashboard</h1>
-<button id="logoutBtn" class="hidden bg-green-700 px-4 py-2 rounded hover:bg-green-900">Logout</button>
 </div>
 </nav>
 
@@ -65,163 +63,7 @@
 </div>
 </section>
 
-<main id="dashboardSection" class="container mx-auto p-6 hidden">
-
-<!-- Filters -->
-<div class="bg-white p-6 rounded shadow mb-6">
-<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-
-<div>
-<label class="block font-semibold mb-2">Select Crop</label>
-<select id="cropSelect" class="p-2 border rounded w-full"></select>
-</div>
-
-<div>
-<label class="block font-semibold mb-2">Select Market</label>
-<select id="marketSelect" class="p-2 border rounded w-full">
-<option value="">Select Market</option>
-</select>
-</div>
-
-<div class="flex items-end">
-<button id="analyzeBtn" class="bg-green-700 text-white px-6 py-2 rounded w-full hover:bg-green-800">
-Analyze
-</button>
-</div>
-
-</div>
-</div>
-
-<!-- Info Cards -->
-<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-
-<div class="bg-white p-6 rounded shadow">
-<h3 class="text-gray-500 text-sm">Latest Price</h3>
-<p id="latestPrice" class="text-2xl font-bold">--</p>
-</div>
-
-<div class="bg-white p-6 rounded shadow">
-<h3 class="text-gray-500 text-sm">Trend</h3>
-<p id="trendText" class="text-2xl font-bold">--</p>
-</div>
-
-<div class="bg-white p-6 rounded shadow">
-<h3 class="text-gray-500 text-sm">Advisory</h3>
-<p id="advisory" class="text-lg font-bold text-blue-600">--</p>
-</div>
-
-</div>
-
-<!-- Chart -->
-<div class="bg-white p-6 rounded shadow mb-6">
-<canvas id="priceChart"></canvas>
-</div>
-
-<!-- Table -->
-<div class="bg-white p-6 rounded shadow">
-<table class="w-full text-left">
-<thead>
-<tr class="border-b">
-<th class="py-2">Market</th>
-<th class="py-2">Date</th>
-<th class="py-2">Price (₹)</th>
-</tr>
-</thead>
-<tbody id="tableBody"></tbody>
-</table>
-</div>
-
-</main>
-
 <script>
-
-let dataStore = {};
-let chartInstance = null;
-let isInitialized = false;
-
-const cropColors = {
-    Mirchi: "#dc2626",
-    Tomato: "#ea580c",
-    Wheat: "#15803d",
-    Rice: "#2563eb"
-};
-
-// Load JSON data
-async function initialize() {
-    if (isInitialized) return;
-    const response = await fetch("data.json");
-    dataStore = await response.json();
-    populateCropDropdown();
-    isInitialized = true;
-}
-
-// Populate Crop Dropdown
-function populateCropDropdown() {
-    const cropSelect = document.getElementById("cropSelect");
-    cropSelect.innerHTML = "";
-
-    Object.keys(dataStore).forEach(crop => {
-        const option = document.createElement("option");
-        option.value = crop;
-        option.textContent = crop;
-        cropSelect.appendChild(option);
-    });
-
-    populateMarketDropdown();
-}
-
-// Populate Market Dropdown
-function populateMarketDropdown() {
-    const selectedCrop = document.getElementById("cropSelect").value;
-    const marketSelect = document.getElementById("marketSelect");
-
-    const uniqueMarkets = [...new Set(dataStore[selectedCrop].map(item => item.market))];
-
-    marketSelect.innerHTML = `<option value="">Select Market</option>`;
-
-    uniqueMarkets.forEach(market => {
-        const option = document.createElement("option");
-        option.value = market;
-        option.textContent = market;
-        marketSelect.appendChild(option);
-    });
-
-    resetDashboard();
-}
-
-// Reset Dashboard UI
-function resetDashboard() {
-    document.getElementById("latestPrice").innerText = "--";
-    document.getElementById("trendText").innerText = "--";
-    document.getElementById("advisory").innerText = "--";
-    document.getElementById("tableBody").innerHTML = "";
-
-    if (chartInstance) {
-        chartInstance.destroy();
-        chartInstance = null;
-    }
-}
-
-// Analyze Button Click
-function analyzeData() {
-
-    const selectedCrop = document.getElementById("cropSelect").value;
-    const selectedMarket = document.getElementById("marketSelect").value;
-
-    if (!selectedMarket) {
-        alert("Please select a market before analyzing.");
-        return;
-    }
-
-    const filteredRecords = dataStore[selectedCrop]
-        .filter(item => item.market === selectedMarket);
-
-    if (filteredRecords.length < 2) return;
-
-    updateTable(filteredRecords);
-    updateSummary(filteredRecords);
-    updateChart(filteredRecords, selectedCrop);
-}
 
 function setAuthTab(activeTab) {
     const loginForm = document.getElementById("loginForm");
@@ -241,20 +83,7 @@ function setAuthTab(activeTab) {
         : "auth-tab-btn w-1/2 py-2 rounded-md text-sm font-semibold text-green-800";
 }
 
-function showDashboard() {
-    document.getElementById("authSection").classList.add("hidden");
-    document.getElementById("dashboardSection").classList.remove("hidden");
-    document.getElementById("logoutBtn").classList.remove("hidden");
-}
-
-function showLogin() {
-    document.getElementById("dashboardSection").classList.add("hidden");
-    document.getElementById("authSection").classList.remove("hidden");
-    document.getElementById("logoutBtn").classList.add("hidden");
-    setAuthTab("login");
-}
-
-async function handleLogin(event) {
+function handleLogin(event) {
     event.preventDefault();
     const username = document.getElementById("username").value.trim();
     const password = document.getElementById("password").value.trim();
@@ -266,11 +95,10 @@ async function handleLogin(event) {
     }
 
     loginError.classList.add("hidden");
-    showDashboard();
-    await initialize();
+    window.location.href = "dashboard.html";
 }
 
-async function handleSignup(event) {
+function handleSignup(event) {
     event.preventDefault();
     const name = document.getElementById("signupName").value.trim();
     const username = document.getElementById("signupUsername").value.trim();
@@ -283,101 +111,15 @@ async function handleSignup(event) {
     }
 
     signupError.classList.add("hidden");
-    showDashboard();
-    await initialize();
+    window.location.href = "dashboard.html";
 }
 
-function handleLogout() {
-    document.getElementById("loginForm").reset();
-    document.getElementById("signupForm").reset();
-    document.getElementById("loginError").classList.add("hidden");
-    document.getElementById("signupError").classList.add("hidden");
-    resetDashboard();
-    showLogin();
-}
-
-// Update Table
-function updateTable(records) {
-    const tableBody = document.getElementById("tableBody");
-
-    tableBody.innerHTML = records.map(record => `
-        <tr class="border-b">
-            <td class="py-2">${record.market}</td>
-            <td class="py-2">${record.arrival_date}</td>
-            <td class="py-2">₹${record.modal_price}</td>
-        </tr>
-    `).join("");
-}
-
-// Update Trend & Advisory
-function updateSummary(records) {
-
-    const latest = records[records.length - 1].modal_price;
-    const previous = records[records.length - 2].modal_price;
-
-    document.getElementById("latestPrice").innerText = "₹ " + latest;
-
-    const trendElement = document.getElementById("trendText");
-    const advisoryElement = document.getElementById("advisory");
-
-    if (latest > previous) {
-        trendElement.innerText = "Increasing ▲";
-        trendElement.className = "text-2xl font-bold text-green-600";
-        advisoryElement.innerText = "Recommendation: Hold stock";
-    }
-    else if (latest < previous) {
-        trendElement.innerText = "Decreasing ▼";
-        trendElement.className = "text-2xl font-bold text-red-600";
-        advisoryElement.innerText = "Recommendation: Consider selling";
-    }
-    else {
-        trendElement.innerText = "Stable ●";
-        trendElement.className = "text-2xl font-bold text-gray-600";
-        advisoryElement.innerText = "Recommendation: Market stable";
-    }
-}
-
-// Update Chart
-function updateChart(records, crop) {
-
-    if (chartInstance) chartInstance.destroy();
-
-    const ctx = document.getElementById("priceChart");
-
-    chartInstance = new Chart(ctx, {
-        type: "line",
-        data: {
-            labels: records.map(r => r.arrival_date),
-            datasets: [{
-                label: crop + " Price",
-                data: records.map(r => r.modal_price),
-                borderColor: cropColors[crop],
-                backgroundColor: cropColors[crop] + "33",
-                borderWidth: 3,
-                tension: 0,
-                pointRadius: 6,
-                fill: true
-            }]
-        },
-        options: {
-            responsive: true,
-            scales: {
-                y: { beginAtZero: false }
-            }
-        }
-    });
-}
-
-// Event Listeners
-document.getElementById("cropSelect").addEventListener("change", populateMarketDropdown);
-document.getElementById("analyzeBtn").addEventListener("click", analyzeData);
 document.getElementById("loginForm").addEventListener("submit", handleLogin);
 document.getElementById("signupForm").addEventListener("submit", handleSignup);
-document.getElementById("logoutBtn").addEventListener("click", handleLogout);
 document.getElementById("showLoginTab").addEventListener("click", () => setAuthTab("login"));
 document.getElementById("showSignupTab").addEventListener("click", () => setAuthTab("signup"));
 
-showLogin();
+setAuthTab("login");
 
 </script>
 
