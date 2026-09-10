@@ -117,6 +117,23 @@ Analyze
 <canvas id="priceChart"></canvas>
 </div>
 
+<!-- Market Map -->
+<div class="bg-white p-6 rounded shadow mb-6">
+<div class="flex items-center justify-between mb-3">
+<h3 class="text-lg font-bold text-green-800">Selected Market Location</h3>
+<p id="marketMapLabel" class="text-sm text-gray-500">Select a market to view map</p>
+</div>
+<div class="rounded overflow-hidden border">
+<iframe
+id="marketMapFrame"
+title="Market Location Map"
+class="w-full h-72"
+src="https://maps.google.com/maps?q=Telangana%20Agriculture%20Market&t=&z=7&ie=UTF8&iwloc=&output=embed"
+loading="lazy"
+referrerpolicy="no-referrer-when-downgrade"></iframe>
+</div>
+</div>
+
 <!-- Table -->
 <div class="bg-white p-6 rounded shadow">
 <table class="w-full text-left">
@@ -138,6 +155,14 @@ Analyze
 let dataStore = {};
 let chartInstance = null;
 let isInitialized = false;
+const marketLocationOverrides = {
+    Warangal: "Warangal Agriculture Market, Telangana, India",
+    Khammam: "Khammam Agriculture Market, Telangana, India",
+    Medak: "Medak Agriculture Market, Telangana, India",
+    Karimnagar: "Karimnagar Agriculture Market, Telangana, India",
+    Nizamabad: "Nizamabad Agriculture Market, Telangana, India",
+    Siddipet: "Siddipet Agriculture Market, Telangana, India"
+};
 
 const cropColors = {
     Mirchi: "#dc2626",
@@ -195,6 +220,7 @@ function resetDashboard() {
     document.getElementById("trendText").innerText = "--";
     document.getElementById("advisory").innerText = "--";
     document.getElementById("tableBody").innerHTML = "";
+    resetMarketMap();
 
     if (chartInstance) {
         chartInstance.destroy();
@@ -211,6 +237,28 @@ function analyzeData() {
     if (!selectedMarket) {
         alert("Please select a market before analyzing.");
         return;
+    }
+
+    function updateMarketMap(selectedMarket) {
+        const mapLabel = document.getElementById("marketMapLabel");
+        const mapFrame = document.getElementById("marketMapFrame");
+
+        if (!selectedMarket) {
+            resetMarketMap();
+            return;
+        }
+
+        const locationQuery = marketLocationOverrides[selectedMarket] || `${selectedMarket} Agriculture Market, Telangana, India`;
+        const encodedQuery = encodeURIComponent(locationQuery);
+        mapFrame.src = `https://maps.google.com/maps?q=${encodedQuery}&t=&z=13&ie=UTF8&iwloc=&output=embed`;
+        mapLabel.innerText = selectedMarket;
+    }
+
+    function resetMarketMap() {
+        const mapLabel = document.getElementById("marketMapLabel");
+        const mapFrame = document.getElementById("marketMapFrame");
+        mapLabel.innerText = "Select a market to view map";
+        mapFrame.src = "https://maps.google.com/maps?q=Telangana%20Agriculture%20Market&t=&z=7&ie=UTF8&iwloc=&output=embed";
     }
 
     const filteredRecords = dataStore[selectedCrop]
@@ -371,6 +419,7 @@ function updateChart(records, crop) {
 // Event Listeners
 document.getElementById("cropSelect").addEventListener("change", populateMarketDropdown);
 document.getElementById("analyzeBtn").addEventListener("click", analyzeData);
+document.getElementById("marketSelect").addEventListener("change", (event) => updateMarketMap(event.target.value));
 document.getElementById("loginForm").addEventListener("submit", handleLogin);
 document.getElementById("signupForm").addEventListener("submit", handleSignup);
 document.getElementById("logoutBtn").addEventListener("click", handleLogout);
