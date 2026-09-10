@@ -16,7 +16,24 @@
 </div>
 </nav>
 
-<main class="container mx-auto p-6">
+<section id="loginSection" class="container mx-auto p-6 max-w-md">
+<div class="bg-white p-6 rounded shadow">
+<h2 class="text-2xl font-bold mb-4 text-green-800">Login</h2>
+<form id="loginForm" class="space-y-4">
+<div>
+<label for="username" class="block font-semibold mb-2">Username</label>
+<input id="username" type="text" class="w-full p-2 border rounded" required>
+</div>
+<div>
+<label for="password" class="block font-semibold mb-2">Password</label>
+<input id="password" type="password" class="w-full p-2 border rounded" required>
+</div>
+<button type="submit" class="bg-green-700 text-white px-4 py-2 rounded w-full hover:bg-green-800">Login</button>
+</form>
+</div>
+</section>
+
+<main id="dashboardSection" class="container mx-auto p-6 hidden">
 
 <!-- Filters -->
 <div class="bg-white p-6 rounded shadow mb-6">
@@ -246,6 +263,19 @@ function updateChart(records, crop) {
 // Event Listeners
 document.getElementById("cropSelect").addEventListener("change", populateMarketDropdown);
 document.getElementById("analyzeBtn").addEventListener("click", analyzeData);
+document.getElementById("loginForm").addEventListener("submit", event => {
+    event.preventDefault();
+    const username = document.getElementById("username").value.trim();
+    const password = document.getElementById("password").value.trim();
+
+    if (!username || !password) {
+        alert("Please enter both username and password.");
+        return;
+    }
+
+    document.getElementById("loginSection").classList.add("hidden");
+    document.getElementById("dashboardSection").classList.remove("hidden");
+});
 
 // Initialize App
 initialize();
