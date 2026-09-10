@@ -2,21 +2,22 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Telangana Smart Market Intelligence</title>
+<title>Telangana Smart Mandi Dashboard</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
-<body class="bg-gray-100 font-sans">
+<body class="bg-gray-100 font-sans min-h-screen">
 
 <!-- Header -->
 <nav class="bg-green-800 text-white p-4 shadow">
-<div class="container mx-auto">
+<div class="container mx-auto flex items-center justify-between">
 <h1 class="text-xl font-bold">🌾 Telangana Smart Mandi Dashboard</h1>
+<button id="logoutBtn" class="bg-green-700 px-4 py-2 rounded hover:bg-green-900">Logout</button>
 </div>
 </nav>
 
-<main class="container mx-auto p-6">
+<main id="dashboardSection" class="container mx-auto p-6">
 
 <!-- Filters -->
 <div class="bg-white p-6 rounded shadow mb-6">
@@ -68,6 +69,23 @@ Analyze
 <canvas id="priceChart"></canvas>
 </div>
 
+<!-- Market Map -->
+<div class="bg-white p-6 rounded shadow mb-6">
+<div class="flex items-center justify-between mb-3">
+<h3 class="text-lg font-bold text-green-800">Selected Market Location</h3>
+<p id="marketMapLabel" class="text-sm text-gray-500">Select a market to view map</p>
+</div>
+<div class="rounded overflow-hidden border">
+<iframe
+id="marketMapFrame"
+title="Market Location Map"
+class="w-full h-72"
+src="https://maps.google.com/maps?q=Telangana%20Agriculture%20Market&t=&z=7&ie=UTF8&iwloc=&output=embed"
+loading="lazy"
+referrerpolicy="no-referrer-when-downgrade"></iframe>
+</div>
+</div>
+
 <!-- Table -->
 <div class="bg-white p-6 rounded shadow">
 <table class="w-full text-left">
@@ -88,6 +106,15 @@ Analyze
 
 let dataStore = {};
 let chartInstance = null;
+
+const marketLocationOverrides = {
+    Warangal: "Warangal Agriculture Market, Telangana, India",
+    Khammam: "Khammam Agriculture Market, Telangana, India",
+    Medak: "Medak Agriculture Market, Telangana, India",
+    Karimnagar: "Karimnagar Agriculture Market, Telangana, India",
+    Nizamabad: "Nizamabad Agriculture Market, Telangana, India",
+    Siddipet: "Siddipet Agriculture Market, Telangana, India"
+};
 
 const cropColors = {
     Mirchi: "#dc2626",
@@ -143,11 +170,35 @@ function resetDashboard() {
     document.getElementById("trendText").innerText = "--";
     document.getElementById("advisory").innerText = "--";
     document.getElementById("tableBody").innerHTML = "";
+    resetMarketMap();
 
     if (chartInstance) {
         chartInstance.destroy();
         chartInstance = null;
     }
+}
+
+// Market Map helpers
+function updateMarketMap(selectedMarket) {
+    const mapLabel = document.getElementById("marketMapLabel");
+    const mapFrame = document.getElementById("marketMapFrame");
+
+    if (!selectedMarket) {
+        resetMarketMap();
+        return;
+    }
+
+    const locationQuery = marketLocationOverrides[selectedMarket] || `${selectedMarket} Agriculture Market, Telangana, India`;
+    const encodedQuery = encodeURIComponent(locationQuery);
+    mapFrame.src = `https://maps.google.com/maps?q=${encodedQuery}&t=&z=13&ie=UTF8&iwloc=&output=embed`;
+    mapLabel.innerText = selectedMarket;
+}
+
+function resetMarketMap() {
+    const mapLabel = document.getElementById("marketMapLabel");
+    const mapFrame = document.getElementById("marketMapFrame");
+    mapLabel.innerText = "Select a market to view map";
+    mapFrame.src = "https://maps.google.com/maps?q=Telangana%20Agriculture%20Market&t=&z=7&ie=UTF8&iwloc=&output=embed";
 }
 
 // Analyze Button Click
@@ -169,6 +220,11 @@ function analyzeData() {
     updateTable(filteredRecords);
     updateSummary(filteredRecords);
     updateChart(filteredRecords, selectedCrop);
+    updateMarketMap(selectedMarket);
+}
+
+function handleLogout() {
+    window.location.href = "login.html";
 }
 
 // Update Table
@@ -246,8 +302,8 @@ function updateChart(records, crop) {
 // Event Listeners
 document.getElementById("cropSelect").addEventListener("change", populateMarketDropdown);
 document.getElementById("analyzeBtn").addEventListener("click", analyzeData);
+document.getElementById("logoutBtn").addEventListener("click", handleLogout);
 
-// Initialize App
 initialize();
 
 </script>
