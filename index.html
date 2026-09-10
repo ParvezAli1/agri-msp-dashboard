@@ -128,7 +128,7 @@ Analyze
 id="marketMapFrame"
 title="Market Location Map"
 class="w-full h-72"
-src="https://maps.google.com/maps?q=Telangana%20Agriculture%20Market&t=&z=7&ie=UTF8&iwloc=&output=embed"
+src="https://maps.google.com/maps?q=17.3850,78.4867&t=&z=7&ie=UTF8&iwloc=&output=embed"
 loading="lazy"
 referrerpolicy="no-referrer-when-downgrade"></iframe>
 </div>
@@ -156,12 +156,12 @@ let dataStore = {};
 let chartInstance = null;
 let isInitialized = false;
 const marketLocationOverrides = {
-    Warangal: "Warangal Agriculture Market, Telangana, India",
-    Khammam: "Khammam Agriculture Market, Telangana, India",
-    Medak: "Medak Agriculture Market, Telangana, India",
-    Karimnagar: "Karimnagar Agriculture Market, Telangana, India",
-    Nizamabad: "Nizamabad Agriculture Market, Telangana, India",
-    Siddipet: "Siddipet Agriculture Market, Telangana, India"
+    Warangal: { label: "Warangal Market", coords: "17.9689,79.5941" },
+    Khammam: { label: "Khammam Market", coords: "17.2473,80.1514" },
+    Medak: { label: "Medak Market", coords: "18.0458,78.2605" },
+    Karimnagar: { label: "Karimnagar Market", coords: "18.4386,79.1288" },
+    Nizamabad: { label: "Nizamabad Market", coords: "18.6725,78.0941" },
+    Siddipet: { label: "Siddipet Market", coords: "18.1018,78.8520" }
 };
 
 const cropColors = {
@@ -239,28 +239,6 @@ function analyzeData() {
         return;
     }
 
-    function updateMarketMap(selectedMarket) {
-        const mapLabel = document.getElementById("marketMapLabel");
-        const mapFrame = document.getElementById("marketMapFrame");
-
-        if (!selectedMarket) {
-            resetMarketMap();
-            return;
-        }
-
-        const locationQuery = marketLocationOverrides[selectedMarket] || `${selectedMarket} Agriculture Market, Telangana, India`;
-        const encodedQuery = encodeURIComponent(locationQuery);
-        mapFrame.src = `https://maps.google.com/maps?q=${encodedQuery}&t=&z=13&ie=UTF8&iwloc=&output=embed`;
-        mapLabel.innerText = selectedMarket;
-    }
-
-    function resetMarketMap() {
-        const mapLabel = document.getElementById("marketMapLabel");
-        const mapFrame = document.getElementById("marketMapFrame");
-        mapLabel.innerText = "Select a market to view map";
-        mapFrame.src = "https://maps.google.com/maps?q=Telangana%20Agriculture%20Market&t=&z=7&ie=UTF8&iwloc=&output=embed";
-    }
-
     const filteredRecords = dataStore[selectedCrop]
         .filter(item => item.market === selectedMarket);
 
@@ -269,6 +247,34 @@ function analyzeData() {
     updateTable(filteredRecords);
     updateSummary(filteredRecords);
     updateChart(filteredRecords, selectedCrop);
+}
+
+function updateMarketMap(selectedMarket) {
+    const mapLabel = document.getElementById("marketMapLabel");
+    const mapFrame = document.getElementById("marketMapFrame");
+
+    if (!selectedMarket) {
+        resetMarketMap();
+        return;
+    }
+
+    const location = marketLocationOverrides[selectedMarket];
+    if (location) {
+        mapFrame.src = `https://maps.google.com/maps?q=${location.coords}&t=&z=14&ie=UTF8&iwloc=&output=embed`;
+        mapLabel.innerText = location.label;
+        return;
+    }
+
+    const fallbackQuery = encodeURIComponent(`${selectedMarket}, Telangana, India`);
+    mapFrame.src = `https://maps.google.com/maps?q=${fallbackQuery}&t=&z=13&ie=UTF8&iwloc=&output=embed`;
+    mapLabel.innerText = selectedMarket;
+}
+
+function resetMarketMap() {
+    const mapLabel = document.getElementById("marketMapLabel");
+    const mapFrame = document.getElementById("marketMapFrame");
+    mapLabel.innerText = "Select a market to view map";
+    mapFrame.src = "https://maps.google.com/maps?q=17.3850,78.4867&t=&z=7&ie=UTF8&iwloc=&output=embed";
 }
 
 function setAuthTab(activeTab) {
