@@ -7,16 +7,36 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
-<body class="bg-gray-100 font-sans">
+<body class="bg-gray-100 font-sans min-h-screen">
 
 <!-- Header -->
 <nav class="bg-green-800 text-white p-4 shadow">
-<div class="container mx-auto">
+<div class="container mx-auto flex items-center justify-between">
 <h1 class="text-xl font-bold">🌾 Telangana Smart Mandi Dashboard</h1>
+<button id="logoutBtn" class="hidden bg-green-700 px-4 py-2 rounded hover:bg-green-900">Logout</button>
 </div>
 </nav>
 
-<main class="container mx-auto p-6">
+<section id="loginSection" class="container mx-auto p-6">
+<div class="max-w-md mx-auto bg-white p-8 rounded shadow mt-12">
+<h2 class="text-2xl font-bold text-green-800 mb-2">Welcome Back</h2>
+<p class="text-gray-600 mb-6">Sign in to continue to the dashboard</p>
+<form id="loginForm" class="space-y-4">
+<div>
+<label for="username" class="block font-semibold mb-2">Username</label>
+<input id="username" type="text" class="p-2 border rounded w-full" placeholder="Enter username" required>
+</div>
+<div>
+<label for="password" class="block font-semibold mb-2">Password</label>
+<input id="password" type="password" class="p-2 border rounded w-full" placeholder="Enter password" required>
+</div>
+<p id="loginError" class="text-sm text-red-600 hidden">Please enter both username and password.</p>
+<button type="submit" class="bg-green-700 text-white px-6 py-2 rounded w-full hover:bg-green-800">Login</button>
+</form>
+</div>
+</section>
+
+<main id="dashboardSection" class="container mx-auto p-6 hidden">
 
 <!-- Filters -->
 <div class="bg-white p-6 rounded shadow mb-6">
@@ -88,6 +108,7 @@ Analyze
 
 let dataStore = {};
 let chartInstance = null;
+let isInitialized = false;
 
 const cropColors = {
     Mirchi: "#dc2626",
@@ -98,9 +119,11 @@ const cropColors = {
 
 // Load JSON data
 async function initialize() {
+    if (isInitialized) return;
     const response = await fetch("data.json");
     dataStore = await response.json();
     populateCropDropdown();
+    isInitialized = true;
 }
 
 // Populate Crop Dropdown
@@ -159,6 +182,41 @@ function analyzeData() {
     if (!selectedMarket) {
         alert("Please select a market before analyzing.");
         return;
+    }
+
+    function showDashboard() {
+        document.getElementById("loginSection").classList.add("hidden");
+        document.getElementById("dashboardSection").classList.remove("hidden");
+        document.getElementById("logoutBtn").classList.remove("hidden");
+    }
+
+    function showLogin() {
+        document.getElementById("dashboardSection").classList.add("hidden");
+        document.getElementById("loginSection").classList.remove("hidden");
+        document.getElementById("logoutBtn").classList.add("hidden");
+    }
+
+    async function handleLogin(event) {
+        event.preventDefault();
+        const username = document.getElementById("username").value.trim();
+        const password = document.getElementById("password").value.trim();
+        const loginError = document.getElementById("loginError");
+
+        if (!username || !password) {
+            loginError.classList.remove("hidden");
+            return;
+        }
+
+        loginError.classList.add("hidden");
+        showDashboard();
+        await initialize();
+    }
+
+    function handleLogout() {
+        document.getElementById("loginForm").reset();
+        document.getElementById("loginError").classList.add("hidden");
+        resetDashboard();
+        showLogin();
     }
 
     const filteredRecords = dataStore[selectedCrop]
@@ -246,9 +304,10 @@ function updateChart(records, crop) {
 // Event Listeners
 document.getElementById("cropSelect").addEventListener("change", populateMarketDropdown);
 document.getElementById("analyzeBtn").addEventListener("click", analyzeData);
+document.getElementById("loginForm").addEventListener("submit", handleLogin);
+document.getElementById("logoutBtn").addEventListener("click", handleLogout);
 
-// Initialize App
-initialize();
+showLogin();
 
 </script>
 
