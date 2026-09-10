@@ -17,11 +17,21 @@
 </div>
 </nav>
 
-<section id="loginSection" class="container mx-auto p-6">
-<div class="max-w-md mx-auto bg-white p-8 rounded shadow mt-12">
-<h2 class="text-2xl font-bold text-green-800 mb-2">Welcome Back</h2>
-<p class="text-gray-600 mb-6">Sign in to continue to the dashboard</p>
-<form id="loginForm" class="space-y-4">
+<section id="authSection" class="relative min-h-[calc(100vh-72px)] bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&w=1800&q=80');">
+<div class="absolute inset-0 bg-black/45"></div>
+<div class="container mx-auto px-6 py-10 relative z-10">
+<div class="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+<div class="text-white">
+<h2 class="text-4xl font-bold mb-4">Smart Agriculture Tracking</h2>
+<p class="text-lg text-green-100">Track mandi prices, trends, and farmer-focused recommendations in one secure dashboard.</p>
+</div>
+<div class="bg-white/95 backdrop-blur rounded-2xl shadow-2xl p-8">
+<div class="flex bg-green-50 rounded-lg p-1 mb-6">
+<button id="showLoginTab" class="auth-tab-btn w-1/2 py-2 rounded-md text-sm font-semibold bg-green-700 text-white">Login</button>
+<button id="showSignupTab" class="auth-tab-btn w-1/2 py-2 rounded-md text-sm font-semibold text-green-800">Sign Up</button>
+</div>
+
+<form id="loginForm" class="auth-form space-y-4">
 <div>
 <label for="username" class="block font-semibold mb-2">Username</label>
 <input id="username" type="text" class="p-2 border rounded w-full" placeholder="Enter username" required>
@@ -33,6 +43,25 @@
 <p id="loginError" class="text-sm text-red-600 hidden">Please enter both username and password.</p>
 <button type="submit" class="bg-green-700 text-white px-6 py-2 rounded w-full hover:bg-green-800">Login</button>
 </form>
+
+<form id="signupForm" class="auth-form space-y-4 hidden">
+<div>
+<label for="signupName" class="block font-semibold mb-2">Full Name</label>
+<input id="signupName" type="text" class="p-2 border rounded w-full" placeholder="Enter full name" required>
+</div>
+<div>
+<label for="signupUsername" class="block font-semibold mb-2">Username</label>
+<input id="signupUsername" type="text" class="p-2 border rounded w-full" placeholder="Choose username" required>
+</div>
+<div>
+<label for="signupPassword" class="block font-semibold mb-2">Password</label>
+<input id="signupPassword" type="password" class="p-2 border rounded w-full" placeholder="Create password" required>
+</div>
+<p id="signupError" class="text-sm text-red-600 hidden">Please fill all signup details.</p>
+<button type="submit" class="bg-green-700 text-white px-6 py-2 rounded w-full hover:bg-green-800">Create Account</button>
+</form>
+</div>
+</div>
 </div>
 </section>
 
@@ -184,41 +213,6 @@ function analyzeData() {
         return;
     }
 
-    function showDashboard() {
-        document.getElementById("loginSection").classList.add("hidden");
-        document.getElementById("dashboardSection").classList.remove("hidden");
-        document.getElementById("logoutBtn").classList.remove("hidden");
-    }
-
-    function showLogin() {
-        document.getElementById("dashboardSection").classList.add("hidden");
-        document.getElementById("loginSection").classList.remove("hidden");
-        document.getElementById("logoutBtn").classList.add("hidden");
-    }
-
-    async function handleLogin(event) {
-        event.preventDefault();
-        const username = document.getElementById("username").value.trim();
-        const password = document.getElementById("password").value.trim();
-        const loginError = document.getElementById("loginError");
-
-        if (!username || !password) {
-            loginError.classList.remove("hidden");
-            return;
-        }
-
-        loginError.classList.add("hidden");
-        showDashboard();
-        await initialize();
-    }
-
-    function handleLogout() {
-        document.getElementById("loginForm").reset();
-        document.getElementById("loginError").classList.add("hidden");
-        resetDashboard();
-        showLogin();
-    }
-
     const filteredRecords = dataStore[selectedCrop]
         .filter(item => item.market === selectedMarket);
 
@@ -227,6 +221,79 @@ function analyzeData() {
     updateTable(filteredRecords);
     updateSummary(filteredRecords);
     updateChart(filteredRecords, selectedCrop);
+}
+
+function setAuthTab(activeTab) {
+    const loginForm = document.getElementById("loginForm");
+    const signupForm = document.getElementById("signupForm");
+    const loginTab = document.getElementById("showLoginTab");
+    const signupTab = document.getElementById("showSignupTab");
+
+    const isLogin = activeTab === "login";
+    loginForm.classList.toggle("hidden", !isLogin);
+    signupForm.classList.toggle("hidden", isLogin);
+
+    loginTab.className = isLogin
+        ? "auth-tab-btn w-1/2 py-2 rounded-md text-sm font-semibold bg-green-700 text-white"
+        : "auth-tab-btn w-1/2 py-2 rounded-md text-sm font-semibold text-green-800";
+    signupTab.className = !isLogin
+        ? "auth-tab-btn w-1/2 py-2 rounded-md text-sm font-semibold bg-green-700 text-white"
+        : "auth-tab-btn w-1/2 py-2 rounded-md text-sm font-semibold text-green-800";
+}
+
+function showDashboard() {
+    document.getElementById("authSection").classList.add("hidden");
+    document.getElementById("dashboardSection").classList.remove("hidden");
+    document.getElementById("logoutBtn").classList.remove("hidden");
+}
+
+function showLogin() {
+    document.getElementById("dashboardSection").classList.add("hidden");
+    document.getElementById("authSection").classList.remove("hidden");
+    document.getElementById("logoutBtn").classList.add("hidden");
+    setAuthTab("login");
+}
+
+async function handleLogin(event) {
+    event.preventDefault();
+    const username = document.getElementById("username").value.trim();
+    const password = document.getElementById("password").value.trim();
+    const loginError = document.getElementById("loginError");
+
+    if (!username || !password) {
+        loginError.classList.remove("hidden");
+        return;
+    }
+
+    loginError.classList.add("hidden");
+    showDashboard();
+    await initialize();
+}
+
+async function handleSignup(event) {
+    event.preventDefault();
+    const name = document.getElementById("signupName").value.trim();
+    const username = document.getElementById("signupUsername").value.trim();
+    const password = document.getElementById("signupPassword").value.trim();
+    const signupError = document.getElementById("signupError");
+
+    if (!name || !username || !password) {
+        signupError.classList.remove("hidden");
+        return;
+    }
+
+    signupError.classList.add("hidden");
+    showDashboard();
+    await initialize();
+}
+
+function handleLogout() {
+    document.getElementById("loginForm").reset();
+    document.getElementById("signupForm").reset();
+    document.getElementById("loginError").classList.add("hidden");
+    document.getElementById("signupError").classList.add("hidden");
+    resetDashboard();
+    showLogin();
 }
 
 // Update Table
@@ -305,7 +372,10 @@ function updateChart(records, crop) {
 document.getElementById("cropSelect").addEventListener("change", populateMarketDropdown);
 document.getElementById("analyzeBtn").addEventListener("click", analyzeData);
 document.getElementById("loginForm").addEventListener("submit", handleLogin);
+document.getElementById("signupForm").addEventListener("submit", handleSignup);
 document.getElementById("logoutBtn").addEventListener("click", handleLogout);
+document.getElementById("showLoginTab").addEventListener("click", () => setAuthTab("login"));
+document.getElementById("showSignupTab").addEventListener("click", () => setAuthTab("signup"));
 
 showLogin();
 
