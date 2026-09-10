@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Telangana Smart Market Intelligence</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body class="bg-gray-100 font-sans min-h-screen">
+
+<!-- Header -->
+<nav class="bg-green-800 text-white p-4 shadow">
+<div class="container mx-auto flex items-center justify-between">
+<h1 class="text-xl font-bold">🌾 Telangana Smart Mandi Dashboard</h1>
+<button id="logoutBtn" class="hidden bg-green-700 px-4 py-2 rounded hover:bg-green-900">Logout</button>
+</div>
+</nav>
+
+<section id="authSection" class="relative min-h-[calc(100vh-72px)] bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&w=1800&q=80');">
+<div class="absolute inset-0 bg-black/45"></div>
+<div class="container mx-auto px-6 py-10 relative z-10">
+<div class="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+<div class="text-white">
+<h2 class="text-4xl font-bold mb-4">Smart Agriculture Tracking</h2>
+<p class="text-lg text-green-100">Track mandi prices, trends, and farmer-focused recommendations in one secure dashboard.</p>
+</div>
+<div class="bg-white/95 backdrop-blur rounded-2xl shadow-2xl p-8">
+<div class="flex bg-green-50 rounded-lg p-1 mb-6">
+<button id="showLoginTab" class="auth-tab-btn w-1/2 py-2 rounded-md text-sm font-semibold bg-green-700 text-white">Login</button>
+<button id="showSignupTab" class="auth-tab-btn w-1/2 py-2 rounded-md text-sm font-semibold text-green-800">Sign Up</button>
+</div>
+
+<form id="loginForm" class="auth-form space-y-4">
+<div>
+<label for="username" class="block font-semibold mb-2">Username</label>
+<input id="username" type="text" class="p-2 border rounded w-full" placeholder="Enter username" required>
+</div>
+<div>
+<label for="password" class="block font-semibold mb-2">Password</label>
+<input id="password" type="password" class="p-2 border rounded w-full" placeholder="Enter password" required>
+</div>
+<p id="loginError" class="text-sm text-red-600 hidden">Please enter both username and password.</p>
+<button type="submit" class="bg-green-700 text-white px-6 py-2 rounded w-full hover:bg-green-800">Login</button>
+</form>
+
+<form id="signupForm" class="auth-form space-y-4 hidden">
+<div>
+<label for="signupName" class="block font-semibold mb-2">Full Name</label>
+<input id="signupName" type="text" class="p-2 border rounded w-full" placeholder="Enter full name" required>
+</div>
+<div>
+<label for="signupUsername" class="block font-semibold mb-2">Username</label>
+<input id="signupUsername" type="text" class="p-2 border rounded w-full" placeholder="Choose username" required>
+</div>
+<div>
+<label for="signupPassword" class="block font-semibold mb-2">Password</label>
+<input id="signupPassword" type="password" class="p-2 border rounded w-full" placeholder="Create password" required>
+</div>
+<p id="signupError" class="text-sm text-red-600 hidden">Please fill all signup details.</p>
+<button type="submit" class="bg-green-700 text-white px-6 py-2 rounded w-full hover:bg-green-800">Create Account</button>
+</form>
+</div>
+</div>
+</div>
+</section>
+
+<main id="dashboardSection" class="container mx-auto p-6 hidden">
+
+<!-- Filters -->
+<div class="bg-white p-6 rounded shadow mb-6">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+<div>
+<label class="block font-semibold mb-2">Select Crop</label>
+<select id="cropSelect" class="p-2 border rounded w-full"></select>
+</div>
+
+<div>
+<label class="block font-semibold mb-2">Select Market</label>
+<select id="marketSelect" class="p-2 border rounded w-full">
+<option value="">Select Market</option>
+</select>
+</div>
+
+<div class="flex items-end">
+<button id="analyzeBtn" class="bg-green-700 text-white px-6 py-2 rounded w-full hover:bg-green-800">
+Analyze
+</button>
+</div>
+
+</div>
+</div>
+
+<!-- Info Cards -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+
+<div class="bg-white p-6 rounded shadow">
+<h3 class="text-gray-500 text-sm">Latest Price</h3>
+<p id="latestPrice" class="text-2xl font-bold">--</p>
+</div>
+
+<div class="bg-white p-6 rounded shadow">
+<h3 class="text-gray-500 text-sm">Trend</h3>
+<p id="trendText" class="text-2xl font-bold">--</p>
+</div>
+
+<div class="bg-white p-6 rounded shadow">
+<h3 class="text-gray-500 text-sm">Advisory</h3>
+<p id="advisory" class="text-lg font-bold text-blue-600">--</p>
+</div>
+
+</div>
+
+<!-- Chart -->
+<div class="bg-white p-6 rounded shadow mb-6">
+<canvas id="priceChart"></canvas>
+</div>
+
+<!-- Table -->
+<div class="bg-white p-6 rounded shadow">
+<table class="w-full text-left">
+<thead>
+<tr class="border-b">
+<th class="py-2">Market</th>
+<th class="py-2">Date</th>
+<th class="py-2">Price (₹)</th>
+</tr>
+</thead>
+<tbody id="tableBody"></tbody>
+</table>
+</div>
+
+</main>
+
+<script>
+
+let dataStore = {};
+let chartInstance = null;
+let isInitialized = false;
+
+const cropColors = {
+    Mirchi: "#dc2626",
+    Tomato: "#ea580c",
+    Wheat: "#15803d",
+    Rice: "#2563eb"
+};
+
+// Load JSON data
+async function initialize() {
+    if (isInitialized) return;
+    const response = await fetch("data.json");
+    dataStore = await response.json();
+    populateCropDropdown();
+    isInitialized = true;
+}
+
+// Populate Crop Dropdown
+function populateCropDropdown() {
+    const cropSelect = document.getElementById("cropSelect");
+    cropSelect.innerHTML = "";
+
+    Object.keys(dataStore).forEach(crop => {
+        const option = document.createElement("option");
+        option.value = crop;
+        option.textContent = crop;
+        cropSelect.appendChild(option);
+    });
+
+    populateMarketDropdown();
+}
+
+// Populate Market Dropdown
+function populateMarketDropdown() {
+    const selectedCrop = document.getElementById("cropSelect").value;
+    const marketSelect = document.getElementById("marketSelect");
+
+    const uniqueMarkets = [...new Set(dataStore[selectedCrop].map(item => item.market))];
+
+    marketSelect.innerHTML = `<option value="">Select Market</option>`;
+
+    uniqueMarkets.forEach(market => {
+        const option = document.createElement("option");
+        option.value = market;
+        option.textContent = market;
+        marketSelect.appendChild(option);
+    });
+
+    resetDashboard();
+}
+
+// Reset Dashboard UI
+function resetDashboard() {
+    document.getElementById("latestPrice").innerText = "--";
+    document.getElementById("trendText").innerText = "--";
+    document.getElementById("advisory").innerText = "--";
+    document.getElementById("tableBody").innerHTML = "";
+
+    if (chartInstance) {
+        chartInstance.destroy();
+        chartInstance = null;
+    }
+}
+
+// Analyze Button Click
+function analyzeData() {
+
+    const selectedCrop = document.getElementById("cropSelect").value;
+    const selectedMarket = document.getElementById("marketSelect").value;
+
+    if (!selectedMarket) {
+        alert("Please select a market before analyzing.");
+        return;
+    }
+
+    const filteredRecords = dataStore[selectedCrop]
+        .filter(item => item.market === selectedMarket);
+
+    if (filteredRecords.length < 2) return;
+
+    updateTable(filteredRecords);
+    updateSummary(filteredRecords);
+    updateChart(filteredRecords, selectedCrop);
+}
+
+function setAuthTab(activeTab) {
+    const loginForm = document.getElementById("loginForm");
+    const signupForm = document.getElementById("signupForm");
+    const loginTab = document.getElementById("showLoginTab");
+    const signupTab = document.getElementById("showSignupTab");
+
+    const isLogin = activeTab === "login";
+    loginForm.classList.toggle("hidden", !isLogin);
+    signupForm.classList.toggle("hidden", isLogin);
+
+    loginTab.className = isLogin
+        ? "auth-tab-btn w-1/2 py-2 rounded-md text-sm font-semibold bg-green-700 text-white"
+        : "auth-tab-btn w-1/2 py-2 rounded-md text-sm font-semibold text-green-800";
+    signupTab.className = !isLogin
+        ? "auth-tab-btn w-1/2 py-2 rounded-md text-sm font-semibold bg-green-700 text-white"
+        : "auth-tab-btn w-1/2 py-2 rounded-md text-sm font-semibold text-green-800";
+}
+
+function showDashboard() {
+    document.getElementById("authSection").classList.add("hidden");
+    document.getElementById("dashboardSection").classList.remove("hidden");
+    document.getElementById("logoutBtn").classList.remove("hidden");
+}
+
+function showLogin() {
+    document.getElementById("dashboardSection").classList.add("hidden");
+    document.getElementById("authSection").classList.remove("hidden");
+    document.getElementById("logoutBtn").classList.add("hidden");
+    setAuthTab("login");
+}
+
+async function handleLogin(event) {
+    event.preventDefault();
+    const username = document.getElementById("username").value.trim();
+    const password = document.getElementById("password").value.trim();
+    const loginError = document.getElementById("loginError");
+
+    if (!username || !password) {
+        loginError.classList.remove("hidden");
+        return;
+    }
+
+    loginError.classList.add("hidden");
+    showDashboard();
+    await initialize();
+}
+
+async function handleSignup(event) {
+    event.preventDefault();
+    const name = document.getElementById("signupName").value.trim();
+    const username = document.getElementById("signupUsername").value.trim();
+    const password = document.getElementById("signupPassword").value.trim();
+    const signupError = document.getElementById("signupError");
+
+    if (!name || !username || !password) {
+        signupError.classList.remove("hidden");
+        return;
+    }
+
+    signupError.classList.add("hidden");
+    showDashboard();
+    await initialize();
+}
+
+function handleLogout() {
+    document.getElementById("loginForm").reset();
+    document.getElementById("signupForm").reset();
+    document.getElementById("loginError").classList.add("hidden");
+    document.getElementById("signupError").classList.add("hidden");
+    resetDashboard();
+    showLogin();
+}
+
+// Update Table
+function updateTable(records) {
+    const tableBody = document.getElementById("tableBody");
+
+    tableBody.innerHTML = records.map(record => `
+        <tr class="border-b">
+            <td class="py-2">${record.market}</td>
+            <td class="py-2">${record.arrival_date}</td>
+            <td class="py-2">₹${record.modal_price}</td>
+        </tr>
+    `).join("");
+}
+
+// Update Trend & Advisory
+function updateSummary(records) {
+
+    const latest = records[records.length - 1].modal_price;
+    const previous = records[records.length - 2].modal_price;
+
+    document.getElementById("latestPrice").innerText = "₹ " + latest;
+
+    const trendElement = document.getElementById("trendText");
+    const advisoryElement = document.getElementById("advisory");
+
+    if (latest > previous) {
+        trendElement.innerText = "Increasing ▲";
+        trendElement.className = "text-2xl font-bold text-green-600";
+        advisoryElement.innerText = "Recommendation: Hold stock";
+    }
+    else if (latest < previous) {
+        trendElement.innerText = "Decreasing ▼";
+        trendElement.className = "text-2xl font-bold text-red-600";
+        advisoryElement.innerText = "Recommendation: Consider selling";
+    }
+    else {
+        trendElement.innerText = "Stable ●";
+        trendElement.className = "text-2xl font-bold text-gray-600";
+        advisoryElement.innerText = "Recommendation: Market stable";
+    }
+}
+
+// Update Chart
+function updateChart(records, crop) {
+
+    if (chartInstance) chartInstance.destroy();
+
+    const ctx = document.getElementById("priceChart");
+
+    chartInstance = new Chart(ctx, {
+        type: "line",
+        data: {
+            labels: records.map(r => r.arrival_date),
+            datasets: [{
+                label: crop + " Price",
+                data: records.map(r => r.modal_price),
+                borderColor: cropColors[crop],
+                backgroundColor: cropColors[crop] + "33",
+                borderWidth: 3,
+                tension: 0,
+                pointRadius: 6,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: { beginAtZero: false }
+            }
+        }
+    });
+}
+
+// Event Listeners
+document.getElementById("cropSelect").addEventListener("change", populateMarketDropdown);
+document.getElementById("analyzeBtn").addEventListener("click", analyzeData);
+document.getElementById("loginForm").addEventListener("submit", handleLogin);
+document.getElementById("signupForm").addEventListener("submit", handleSignup);
+document.getElementById("logoutBtn").addEventListener("click", handleLogout);
+document.getElementById("showLoginTab").addEventListener("click", () => setAuthTab("login"));
+document.getElementById("showSignupTab").addEventListener("click", () => setAuthTab("signup"));
+
+showLogin();
+
+</script>
+
+</body>
+</html>
